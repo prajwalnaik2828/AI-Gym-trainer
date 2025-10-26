@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-md-8">
+    <div class="card p-2">
+      <div class="ratio ratio-16x9 bg-black">
+        <video id="cam" autoplay playsinline class="w-100 h-100" style="object-fit:cover;"></video>
+      </div>
+      <div class="mt-2 d-flex gap-2">
+        <button id="startBtn" class="btn btn-primary">Start</button>
+        <button id="stopBtn" class="btn btn-outline-secondary">Stop & Save</button>
+      </div>
+      <div class="mt-2 small text-warning" id="statusMsg"></div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-2">
+      <h5 class="mb-2 text-capitalize">{{ exercise }}</h5>
+      <img id="serverFrame" class="img-fluid rounded border" alt="Live annotated frame from your webcam" />
+      <div class="mt-3">
+        <div><b>Reps:</b> <span id="reps">0</span></div>
+        <div><b>Status:</b> <span id="status">-</span></div>
+        <div class="mt-2 text-info" id="cueText"></div>
+      </div>
+      {% if tutorial %}
+      <div class="mt-3">
+        <button class="btn btn-gradient w-100" data-bs-toggle="modal" data-bs-target="#tutorialModal"><i class="bi bi-play-circle me-1"></i>Watch tutorial</button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+const CSRF = {{ csrf|tojson if csrf is defined else 'null' }};
+const cam = document.getElementById('cam');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const serverFrame = document.getElementById('serverFrame');
+const repsEl = document.getElementById('reps');
+const statusEl = document.getElementById('status');
+const cueEl = document.getElementById('cueText');
+// Reuse a single canvas at a reduced resolution to avoid per-frame allocations
+const workCanvas = document.createElement('canvas');
+const workCtx = workCanvas.getContext('2d', { alpha: false });
+workCanvas.width = 426; // ~240p width
+workCanvas.height = 240;
+
+let stream = null;
+let running = false;
+let exercise = {{ exercise|tojson }};
+
+async function setupCam() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { width: {ideal: 640}, height: {ideal: 360}, frameRate: {ideal: 10, max: 12} }, audio: false });
+    cam.srcObject = stream;
+    document.getElementById('statusMsg').textContent = '';
+  } catch (e) {
+    console.error(e);
+    document.getElementById('statusMsg').textContent = 'Camera access failed. Check permissions and try HTTPS if required.';
+  }
+}
+
+let lastSent = 0;
+let inFlight = false;
+let lastCue = '';
+let lastCueAt = 0;
+let backoff = 0;
+let loopTimer = null;
+let lastFrameSrc = '';
+
+async function tick() {
+  if (!running) return;
+  try {
+    const vw = cam.videoWidth || 800, vh = cam.videoHeight || 480;
+    if (!vw || !vh) return scheduleNext();
+    // Draw downscaled frame
+    workCtx.drawImage(cam, 0, 0, workCanvas.width, workCanvas.height);
+    // ensure single in-flight request and ~5-6 fps base + backoff
+    const now = performance.now();
+    if (now - lastSent < 180 + backoff || inFlight) return scheduleNext();
+    lastSent = now;
+    const dataUrl = workCanvas.toDataURL('image/jpeg', 0.5);
+
+    const controller = new AbortController();
+    const to = setTimeout(() => controller.abort(), 2500 + backoff);
+    inFlight = true;
+    const res = await fetch('{{ url_for('api_frame') }}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: dataUrl, exercise, _csrf: CSRF }),
+      signal: controller.signal
+    });
+    clearTimeout(to);
+    if (res.ok) {
+      const data = await res.json();
+      backoff = Math.max(0, backoff - 100);
+      if (data.image && data.image !== lastFrameSrc) {
+        lastFrameSrc = data.image;
+        serverFrame.src = data.image;
+      }
+      if (repsEl.textContent !== String(data.counter)) repsEl.textContent = data.counter;
+      const s = data.status ? 'Up' : 'Down';
+      if (statusEl.textContent !== s) statusEl.textContent = s;
+      if (data.cue) {
+        cueEl.textContent = data.cue;
+        const t = performance.now();
+        if (data.cue !== lastCue || t - lastCueAt > 3500) {
+          lastCue = data.cue; lastCueAt = t;
+          try {
+            const utter = new SpeechSynthesisUtterance(data.cue);
+            speechSynthesis.cancel();
+            speechSynthesis.speak(utter);
+          } catch (e) {}
+        }
+      }
+      document.getElementById('statusMsg').textContent = '';
+    } else {
+      document.getElementById('statusMsg').textContent = 'Server busy... retrying';
+      backoff = Math.min(1200, backoff + 150);
+    }
+  } catch (e) {
+    console.error(e);
+    document.getElementById('statusMsg').textContent = 'Network error... retrying';
+    backoff = Math.min(1500, backoff + 200);
+  } finally {
+    inFlight = false;
+    scheduleNext();
+  }
+}
+
+function scheduleNext() {
+  if (!running) return;
+  const interval = 180 + backoff; // ms
+  clearTimeout(loopTimer);
+  loopTimer = setTimeout(tick, interval);
+}
+
+startBtn.addEventListener('click', async () => {
+  if (!stream) await setupCam();
+  running = true;
+  scheduleNext();
+});
+
+stopBtn.addEventListener('click', async () => {
+  running = false;
+  try {
+    await fetch('{{ url_for('api_finish') }}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ exercise }) });
+    window.location.href = '{{ url_for('dashboard') }}';
+  } catch (e) { console.error(e); }
+  try {
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+  } catch (e) {}
+});
+
+setupCam();
+
+// Pause/resume when tab hidden to reduce load
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    running = false;
+  }
+});
+
+</script>
+
+{% if tutorial %}
+<!-- Tutorial Modal -->
+<div class="modal fade" id="tutorialModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-play-circle me-2"></i>Tutorial</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="ratio ratio-16x9">
+          <iframe src="{{ tutorial }}" title="Exercise tutorial" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="no-referrer"></iframe>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  </div>
+{% endif %}
+</script>
+{% endblock %}
+
+

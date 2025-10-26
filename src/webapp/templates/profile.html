@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Profile Settings</h2>
+<form method="post" class="card p-3">
+  <div class="row g-2">
+    <div class="col-md-6"><label class="form-label">Full Name</label><input class="form-control" name="full_name" placeholder="John Doe"></div>
+    <div class="col-md-3"><label class="form-label">Age</label><input class="form-control" name="age" type="number" min="0" placeholder="24"></div>
+    <div class="col-md-3"><label class="form-label">Level</label>
+      <select class="form-select" name="level"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
+    </div>
+  </div>
+  <div class="row g-2 mt-2">
+    <div class="col-md-3"><label class="form-label">Height (cm)</label><input class="form-control" name="height_cm" type="number" min="0" placeholder="175"></div>
+    <div class="col-md-3"><label class="form-label">Weight (kg)</label><input class="form-control" name="weight_kg" type="number" min="0" placeholder="70"></div>
+    <div class="col-md-3"><label class="form-label">Gender</label>
+      <select class="form-select" name="gender"><option>Male</option><option>Female</option><option>Other</option></select>
+    </div>
+    <div class="col-md-3"><label class="form-label">Email</label><input class="form-control" name="email" type="email" placeholder="you@example.com"></div>
+  </div>
+  <button class="btn btn-primary mt-3" type="submit">Save</button>
+</form>
+{% endblock %}
+

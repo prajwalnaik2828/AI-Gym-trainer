@@ -1,0 +1,73 @@
+:root {
+  --brand: #6c5ce7;
+  --brand-2: #a29bfe;
+  --accent: #00cec9;
+  --accent-2: #fd79a8;
+  --accent-3: #55efc4;
+  --bg-grad-1: #0f2027;
+  --bg-grad-2: #203a43;
+  --bg-grad-3: #2c5364;
+}
+
+body.bg-light {
+  background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3));
+  min-height: 100vh;
+}
+
+.navbar {
+  background: linear-gradient(90deg, var(--brand), var(--accent));
+}
+
+.card.shadow-card {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  border: none;
+  border-radius: 16px;
+}
+
+.btn-gradient {
+  background: linear-gradient(90deg, var(--brand), var(--accent));
+  color: white;
+  border: none;
+}
+.btn-gradient:hover { opacity: 0.9; }
+
+.exercise-card {
+  transition: transform .15s ease, box-shadow .15s ease;
+  cursor: pointer;
+}
+.exercise-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+}
+
+.exercise-card.squat { border-left: 6px solid var(--accent-3); }
+.exercise-card.pushup { border-left: 6px solid var(--brand); }
+.exercise-card.situp { border-left: 6px solid var(--accent); }
+.exercise-card.walk { border-left: 6px solid var(--accent-2); }
+
+.icon-circle {
+  width: 48px; height: 48px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.08);
+}
+
+.muted { color: rgba(255,255,255,0.8); }
+
+.profile-badge {
+  background: linear-gradient(90deg, var(--brand-2), var(--accent));
+  color: #111;
+  border: none;
+}
+
+.tag {
+  display:inline-block;
+  padding: .15rem .5rem;
+  border-radius: 999px;
+  font-size: .8rem;
+}
+.tag-info { background: rgba(0, 206, 201, .15); color: #00cec9; }
+.tag-pink { background: rgba(253, 121, 168, .15); color: #fd79a8; }
+.tag-green { background: rgba(85, 239, 196, .15); color: #55efc4; }
+
+

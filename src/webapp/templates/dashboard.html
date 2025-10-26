@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 text-white">
+  <h3 class="mb-0 d-flex align-items-center gap-2"><i class="bi bi-person-badge"></i>Welcome{{ ' ' + user.full_name if user and user.full_name else '' }}!</h3>
+  <div class="d-flex gap-2">
+    <button class="btn btn-warning profile-badge" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="bi bi-person-lines-fill me-1"></i>Profile</button>
+    <button class="btn btn-gradient" data-bs-toggle="modal" data-bs-target="#goalModal"><i class="bi bi-bullseye me-1"></i>Set Goal</button>
+    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#viewGoalsModal"><i class="bi bi-list-check me-1"></i>View Goals</button>
+    <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#historyModal"><i class="bi bi-clock-history me-1"></i>View History</button>
+    <a class="btn btn-light" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
+  </div>
+  </div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card p-3 shadow-card">
+      <h5 class="mb-3"><i class="bi bi-lightning-charge-fill me-1 text-warning"></i> Quick start</h5>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <a class="text-decoration-none" href="{{ url_for('workout', exercise='squat') }}">
+            <div class="card p-3 exercise-card squat">
+              <div class="d-flex align-items-center gap-3">
+                <span class="icon-circle"><i class="bi bi-signpost"></i></span>
+                <div>
+                  <div class="fw-bold">Squats</div>
+                  <div class="text-muted">Leg strength and form <span class="tag tag-green ms-1">popular</span></div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-6">
+          <a class="text-decoration-none" href="{{ url_for('workout', exercise='push-up') }}">
+            <div class="card p-3 exercise-card pushup">
+              <div class="d-flex align-items-center gap-3">
+                <span class="icon-circle"><i class="bi bi-hand-index-thumb"></i></span>
+                <div>
+                  <div class="fw-bold">Push-ups</div>
+                  <div class="text-muted">Upper body endurance <span class="tag tag-info ms-1">new</span></div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-6">
+          <a class="text-decoration-none" href="{{ url_for('workout', exercise='sit-up') }}">
+            <div class="card p-3 exercise-card situp">
+              <div class="d-flex align-items-center gap-3">
+                <span class="icon-circle"><i class="bi bi-dash-circle"></i></span>
+                <div>
+                  <div class="fw-bold">Sit-ups</div>
+                  <div class="text-muted">Core stability</div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-6">
+          <a class="text-decoration-none" href="{{ url_for('workout', exercise='walk') }}">
+            <div class="card p-3 exercise-card walk">
+              <div class="d-flex align-items-center gap-3">
+                <span class="icon-circle"><i class="bi bi-geo-alt"></i></span>
+                <div>
+                  <div class="fw-bold">Walk</div>
+                  <div class="text-muted">Stride rhythm</div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card p-3 shadow-card">
+      <h5 class="mb-3"><i class="bi bi-clock-history me-1 text-info"></i> Recent workouts</h5>
+      {% if recent %}
+        <ul class="list-group list-group-flush">
+          {% for w in recent[-6:] | reverse %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-check2-square me-2 text-success"></i>{{ w.exercise }}</span>
+              <span class="badge text-bg-primary rounded-pill">{{ w.reps }} reps</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="text-muted">No workouts yet.</div>
+      {% endif %}
+    </div>
+
+    <div class="card p-3 shadow-card mt-3">
+      <h5 class="mb-3"><i class="bi bi-flag me-1 text-warning"></i> Goals</h5>
+      {% if goals %}
+        <ul class="list-group list-group-flush">
+          {% for g in goals | reverse %}
+            <li class="list-group-item">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-bullseye me-1 text-danger"></i>
+                  <div>
+                    <div class="fw-semibold">{{ g.type }}</div>
+                    <div class="small text-muted">Due {{ g.target_date }}{% if g.days_left is not none %} ({{ g.days_left }} days left){% endif %}</div>
+                  </div>
+                </div>
+                {% if g.notes %}<span class="badge text-bg-secondary">{{ g.notes }}</span>{% endif %}
+              </div>
+              <div class="progress mt-2" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ g.progress }}">
+                <div class="progress-bar {% if g.completed %}bg-success{% elif g.warn %}bg-danger{% else %}bg-info{% endif %}" style="width: {{ g.progress }}%">
+                  {{ g.progress }}%
+                </div>
+              </div>
+              {% if g.warn and not g.completed %}
+                <div class="small text-danger mt-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Due date is near. Keep going!</div>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="text-muted">No goals set yet.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-person-lines-fill me-2"></i>Your Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="{{ url_for('profile_update') }}">
+          <input type="hidden" name="_csrf" value="{{ csrf }}">
+          <div class="row g-2">
+            <div class="col-12"><label class="form-label">Full Name</label><input class="form-control" name="full_name" value="{{ user.full_name or '' }}"></div>
+            <div class="col-6"><label class="form-label">Age</label><input class="form-control" name="age" type="number" min="0" value="{{ user.age or '' }}"></div>
+            <div class="col-6"><label class="form-label">Gender</label>
+              <select class="form-select" name="gender">
+                <option {% if (user.gender or '')=='Male' %}selected{% endif %}>Male</option>
+                <option {% if (user.gender or '')=='Female' %}selected{% endif %}>Female</option>
+                <option {% if (user.gender or '')=='Other' %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+            <div class="col-6"><label class="form-label">Height (cm)</label><input class="form-control" name="height_cm" type="number" min="0" value="{{ user.height_cm or '' }}"></div>
+            <div class="col-6"><label class="form-label">Weight (kg)</label><input class="form-control" name="weight_kg" type="number" min="0" value="{{ user.weight_kg or '' }}"></div>
+            <div class="col-12"><label class="form-label">Email</label><input class="form-control" value="{{ user.username or '' }}" disabled></div>
+          </div>
+          <div class="modal-footer px-0">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gradient"><i class="bi bi-save me-1"></i>Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  </div>
+
+<!-- History Modal -->
+<div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-clock-history me-2"></i>Workout History</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% if totals %}
+          <ul class="list-group">
+            {% for k, v in totals.items() %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-activity"></i>
+                  <span class="text-capitalize">{{ k }}</span>
+                </div>
+                <div class="text-end">
+                  <div><b>{{ v.reps }}</b> reps total</div>
+                  <div class="small text-muted">{{ (v.duration_sec // 60) }} min {{ (v.duration_sec % 60) }} sec</div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-muted">No workout history yet.</div>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+<!-- Goal Modal -->
+<div class="modal fade" id="goalModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-bullseye me-2"></i>Set a Goal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{{ url_for('goals_create') }}">
+        <input type="hidden" name="_csrf" value="{{ csrf }}">
+        <div class="modal-body">
+          <div class="row g-2">
+            <div class="col-12"><label class="form-label">Goal</label>
+              <select class="form-select" name="goal_type" required>
+                <option>Muscle building</option>
+                <option>Weight loss</option>
+                <option>Improve endurance</option>
+                <option>Increase flexibility</option>
+                <option>Rehab & mobility</option>
+              </select>
+            </div>
+            <div class="col-6"><label class="form-label">Target date</label><input class="form-control" name="target_date" type="date" required></div>
+            <div class="col-12"><label class="form-label">Notes (optional)</label><textarea class="form-control" name="notes" rows="2" placeholder="Add a short note"></textarea></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-gradient"><i class="bi bi-check2-circle me-1"></i>Save Goal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  </div>
+
+<!-- View Goals Modal -->
+<div class="modal fade" id="viewGoalsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-list-check me-2"></i>Your Goals</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% if goals %}
+          <div class="list-group">
+            {% for g in goals %}
+              <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="fw-semibold">{{ g.type }}</div>
+                    <div class="small text-muted">Due {{ g.target_date }}{% if g.days_left is not none %} ({{ g.days_left }} days left){% endif %}</div>
+                    {% if g.notes %}<div class="small">{{ g.notes }}</div>{% endif %}
+                  </div>
+                  {% if g.warn and not g.completed %}
+                    <span class="badge text-bg-danger">Due soon</span>
+                  {% elif g.completed %}
+                    <span class="badge text-bg-success">Completed</span>
+                  {% else %}
+                    <span class="badge text-bg-info">In progress</span>
+                  {% endif %}
+                </div>
+                <div class="progress mt-2" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ g.progress }}">
+                  <div class="progress-bar {% if g.completed %}bg-success{% elif g.warn %}bg-danger{% else %}bg-info{% endif %}" style="width: {{ g.progress }}%">{{ g.progress }}%</div>
+                </div>
+                <form class="row g-2 mt-2" method="post" action="{{ url_for('goals_update') }}">
+                  <input type="hidden" name="_csrf" value="{{ csrf }}">
+                  <input type="hidden" name="index" value="{{ g.index }}">
+                  <div class="col-md-6">
+                    <label class="form-label">Progress (%)</label>
+                    <input class="form-control" type="number" name="progress" min="0" max="100" value="{{ g.progress }}">
+                  </div>
+                  <div class="col-md-3 form-check d-flex align-items-end">
+                    <input class="form-check-input me-2" type="checkbox" name="completed" id="done{{ g.index }}" {% if g.completed %}checked{% endif %}>
+                    <label class="form-check-label" for="done{{ g.index }}">Completed</label>
+                  </div>
+                  <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-gradient w-100" type="submit"><i class="bi bi-save me-1"></i>Update</button>
+                  </div>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-muted">No goals to show.</div>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  </div>
+{% endblock %}
+
+
