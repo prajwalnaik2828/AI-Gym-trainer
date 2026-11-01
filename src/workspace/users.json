@@ -1,159 +1,34 @@
 {
   "users": [
     {
-      "username": "prajwalnaik286@gmail.com",
-      "password": "hiiamprajwal",
-      "full_name": "prajwal naik",
-      "level": "Beginner",
-      "age": null,
-      "height_cm": null,
-      "weight_kg": null
-    },
-    {
-      "username": "prajwalunaik24@gamil.com",
+      "username": "demo@aigym.com",
       "password": "$2b$12$2oyxgzVqBEn5H4fo6pNFVexu9k8XGHhIzzcTQqb24xmV2irUvT/fO",
-      "full_name": "prajwal naik",
-      "level": "Beginner",
-      "age": null,
-      "height_cm": null,
-      "weight_kg": null
-    },
-    {
-      "username": "orochimarulord62@gmail.com",
-      "password": "$2b$12$tWYmBYu4qYZcM2AWs97YNu3praW0nMd8C6uWasxUFmBWtqnan.Eci",
-      "full_name": "prajwal naik",
-      "level": "Beginner",
-      "age": 21,
-      "height_cm": 178,
-      "weight_kg": 52,
-      "gender": "Male"
+      "full_name": "Demo Athlete",
+      "level": "Intermediate",
+      "age": 25,
+      "height_cm": 175,
+      "weight_kg": 70,
+      "gender": "Other"
     }
   ],
   "workouts": {
-    "orochimarulord62@gmail.com": [
+    "demo@aigym.com": [
       {
         "exercise": "squat",
-        "reps": 4,
-        "form_score": 100
-      },
-      {
-        "exercise": "squat",
-        "reps": 4,
-        "form_score": 100
-      },
-      {
-        "exercise": "squat",
-        "reps": 5,
-        "form_score": 100
-      },
-      {
-        "exercise": "push-up",
-        "reps": 0,
-        "form_score": 0
-      },
-      {
-        "exercise": "squat",
-        "reps": 0,
-        "form_score": 0
-      },
-      {
-        "exercise": "squat",
-        "reps": 0,
-        "form_score": 0,
-        "duration_sec": 15
-      },
-      {
-        "exercise": "walk",
-        "reps": 1,
-        "form_score": 100,
-        "duration_sec": 9
-      },
-      {
-        "exercise": "squat",
-        "reps": 2,
-        "form_score": 100,
+        "reps": 10,
+        "form_score": 95,
         "duration_sec": 45
-      },
-      {
-        "exercise": "squat",
-        "reps": 0,
-        "form_score": 0,
-        "duration_sec": 21
-      },
-      {
-        "exercise": "sit-up",
-        "reps": 0,
-        "form_score": 0,
-        "duration_sec": 14
-      },
-      {
-        "exercise": "squat",
-        "reps": 0,
-        "form_score": 0,
-        "duration_sec": 22
-      },
-      {
-        "exercise": "push-up",
-        "reps": 1,
-        "form_score": 100,
-        "duration_sec": 23
-      },
-      {
-        "exercise": "squat",
-        "reps": 0,
-        "form_score": 0,
-        "duration_sec": 26
-      },
-      {
-        "exercise": "squat",
-        "reps": 1,
-        "form_score": 100,
-        "duration_sec": 28
-      },
-      {
-        "exercise": "squat",
-        "reps": 1,
-        "form_score": 100,
-        "duration_sec": 97
-      },
-      {
-        "exercise": "push-up",
-        "reps": 0,
-        "form_score": 0,
-        "duration_sec": 5
-      },
-      {
-        "exercise": "squat",
-        "reps": 2,
-        "form_score": 100,
-        "duration_sec": 15
-      },
-      {
-        "exercise": "squat",
-        "reps": 1,
-        "form_score": 100,
-        "duration_sec": 65
-      },
-      {
-        "exercise": "squat",
-        "reps": 11,
-        "form_score": 100,
-        "duration_sec": 49
-      },
-      {
-        "exercise": "walk",
-        "reps": 0,
-        "form_score": 0,
-        "duration_sec": 11
       }
     ]
   },
   "goals": {
-    "orochimarulord62@gmail.com": [
+    "demo@aigym.com": [
       {
         "type": "Muscle building",
-        "target_date": "2025-10-16",
-        "notes": ""
+        "target_date": "2026-12-31",
+        "notes": "Daily 20 squats routine",
+        "progress": 30,
+        "completed": false
       }
     ]
   }

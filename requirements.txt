@@ -109,7 +109,7 @@ wheel==0.37.1
 widgetsnbextension==3.5.2
 win-inet-pton==1.1.0
 wincertstore==0.2
-numpy
+numpy>=1.24.0,<2.0.0
 mkl-fft
 mkl-random
 mediapipe
@@ -121,3 +121,5 @@ Flask>=2.3.2
 itsdangerous>=2.1.2
 Werkzeug>=2.3.6
 Jinja2>=3.1.2
+
+ultralytics>=8.3.0

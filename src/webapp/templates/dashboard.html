@@ -1,210 +1,376 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3 text-white">
-  <h3 class="mb-0 d-flex align-items-center gap-2"><i class="bi bi-person-badge"></i>Welcome{{ ' ' + user.full_name if user and user.full_name else '' }}!</h3>
-  <div class="d-flex gap-2">
-    <button class="btn btn-warning profile-badge" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="bi bi-person-lines-fill me-1"></i>Profile</button>
-    <button class="btn btn-gradient" data-bs-toggle="modal" data-bs-target="#goalModal"><i class="bi bi-bullseye me-1"></i>Set Goal</button>
-    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#viewGoalsModal"><i class="bi bi-list-check me-1"></i>View Goals</button>
-    <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#historyModal"><i class="bi bi-clock-history me-1"></i>View History</button>
-    <a class="btn btn-light" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
+<!-- Welcome & Quick Action Bar -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 text-white">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <h3 class="mb-0 fw-bold">
+        Welcome back, <span class="text-info">{{ user.full_name if user and user.full_name else 'Athlete' }}</span>!
+      </h3>
+      <span class="badge py-1 px-2 d-none d-sm-inline-block" style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.35); font-weight: 600;">
+        <i class="bi bi-lightning-charge-fill text-warning me-1"></i>AI Coach Active
+      </span>
+    </div>
+    <p class="text-secondary small mb-0">Select an exercise to start real-time pose tracking or manage your workout goals.</p>
   </div>
+  
+  <div class="d-flex flex-wrap gap-2">
+    <button class="btn btn-glass" data-bs-toggle="modal" data-bs-target="#profileModal">
+      <i class="bi bi-person-badge text-info"></i>
+      <span>Profile</span>
+    </button>
+    <button class="btn btn-glass-primary" data-bs-toggle="modal" data-bs-target="#goalModal">
+      <i class="bi bi-plus-circle text-primary"></i>
+      <span>Set Goal</span>
+    </button>
+    <button class="btn btn-glass" data-bs-toggle="modal" data-bs-target="#viewGoalsModal">
+      <i class="bi bi-list-check text-warning"></i>
+      <span>View Goals</span>
+    </button>
+    <button class="btn btn-glass" data-bs-toggle="modal" data-bs-target="#historyModal">
+      <i class="bi bi-clock-history text-success"></i>
+      <span>History</span>
+    </button>
   </div>
+</div>
 
-<div class="row g-3">
+<!-- Main Dashboard Grid -->
+<div class="row g-4">
+  <!-- Left Column: Quick Start Exercise Grid -->
   <div class="col-lg-8">
-    <div class="card p-3 shadow-card">
-      <h5 class="mb-3"><i class="bi bi-lightning-charge-fill me-1 text-warning"></i> Quick start</h5>
+    <div class="card p-4 shadow-card h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="card-header-title">
+          <i class="bi bi-lightning-charge-fill text-warning"></i>
+          <span>Quick Start Workouts</span>
+        </div>
+        <span class="small text-secondary">Click any card to launch camera</span>
+      </div>
+
       <div class="row g-3">
+        <!-- Squats -->
         <div class="col-md-6">
-          <a class="text-decoration-none" href="{{ url_for('workout', exercise='squat') }}">
-            <div class="card p-3 exercise-card squat">
+          <a class="exercise-card squat" href="{{ url_for('workout', exercise='squat') }}">
+            <div class="d-flex align-items-center justify-content-between">
               <div class="d-flex align-items-center gap-3">
-                <span class="icon-circle"><i class="bi bi-signpost"></i></span>
+                <span class="icon-circle icon-squat">
+                  <i class="bi bi-person-standing"></i>
+                </span>
                 <div>
-                  <div class="fw-bold">Squats</div>
-                  <div class="text-muted">Leg strength and form <span class="tag tag-green ms-1">popular</span></div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="exercise-title">Squats</span>
+                    <span class="tag tag-green">Popular</span>
+                  </div>
+                  <div class="exercise-desc">Knee flexion & hip depth tracker</div>
                 </div>
               </div>
+              <span class="exercise-arrow"><i class="bi bi-chevron-right"></i></span>
             </div>
           </a>
         </div>
+
+        <!-- Push-ups -->
         <div class="col-md-6">
-          <a class="text-decoration-none" href="{{ url_for('workout', exercise='push-up') }}">
-            <div class="card p-3 exercise-card pushup">
+          <a class="exercise-card pushup" href="{{ url_for('workout', exercise='push-up') }}">
+            <div class="d-flex align-items-center justify-content-between">
               <div class="d-flex align-items-center gap-3">
-                <span class="icon-circle"><i class="bi bi-hand-index-thumb"></i></span>
+                <span class="icon-circle icon-pushup">
+                  <i class="bi bi-shield-check"></i>
+                </span>
                 <div>
-                  <div class="fw-bold">Push-ups</div>
-                  <div class="text-muted">Upper body endurance <span class="tag tag-info ms-1">new</span></div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="exercise-title">Push-ups</span>
+                    <span class="tag tag-info">Strength</span>
+                  </div>
+                  <div class="exercise-desc">Elbow angle & chest alignment</div>
                 </div>
               </div>
+              <span class="exercise-arrow"><i class="bi bi-chevron-right"></i></span>
             </div>
           </a>
         </div>
+
+        <!-- Sit-ups -->
         <div class="col-md-6">
-          <a class="text-decoration-none" href="{{ url_for('workout', exercise='sit-up') }}">
-            <div class="card p-3 exercise-card situp">
+          <a class="exercise-card situp" href="{{ url_for('workout', exercise='sit-up') }}">
+            <div class="d-flex align-items-center justify-content-between">
               <div class="d-flex align-items-center gap-3">
-                <span class="icon-circle"><i class="bi bi-dash-circle"></i></span>
+                <span class="icon-circle icon-situp">
+                  <i class="bi bi-heart-pulse"></i>
+                </span>
                 <div>
-                  <div class="fw-bold">Sit-ups</div>
-                  <div class="text-muted">Core stability</div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="exercise-title">Sit-ups</span>
+                    <span class="tag tag-cyan">Core</span>
+                  </div>
+                  <div class="exercise-desc">Abdominal flexion & repetition detection</div>
                 </div>
               </div>
+              <span class="exercise-arrow"><i class="bi bi-chevron-right"></i></span>
             </div>
           </a>
         </div>
+
+        <!-- Walk -->
         <div class="col-md-6">
-          <a class="text-decoration-none" href="{{ url_for('workout', exercise='walk') }}">
-            <div class="card p-3 exercise-card walk">
+          <a class="exercise-card walk" href="{{ url_for('workout', exercise='walk') }}">
+            <div class="d-flex align-items-center justify-content-between">
               <div class="d-flex align-items-center gap-3">
-                <span class="icon-circle"><i class="bi bi-geo-alt"></i></span>
+                <span class="icon-circle icon-walk">
+                  <i class="bi bi-geo-alt-fill"></i>
+                </span>
                 <div>
-                  <div class="fw-bold">Walk</div>
-                  <div class="text-muted">Stride rhythm</div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="exercise-title">Walk</span>
+                    <span class="tag tag-pink">Cardio</span>
+                  </div>
+                  <div class="exercise-desc">Stride cadence & step posture rhythm</div>
                 </div>
               </div>
+              <span class="exercise-arrow"><i class="bi bi-chevron-right"></i></span>
             </div>
           </a>
         </div>
       </div>
+
+      <!-- Quick Guidance Banner -->
+      <div class="mt-4 p-3 rounded-3" style="background: rgba(99, 102, 241, 0.08); border: 1px dashed rgba(99, 102, 241, 0.25);">
+        <div class="d-flex align-items-center gap-2 text-info small">
+          <i class="bi bi-info-circle-fill fs-6"></i>
+          <span><strong>Pro-Tip:</strong> Ensure your entire upper & lower body are visible in frame with adequate lighting for the highest MediaPipe accuracy.</span>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="col-lg-4">
-    <div class="card p-3 shadow-card">
-      <h5 class="mb-3"><i class="bi bi-clock-history me-1 text-info"></i> Recent workouts</h5>
-      {% if recent %}
-        <ul class="list-group list-group-flush">
-          {% for w in recent[-6:] | reverse %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span><i class="bi bi-check2-square me-2 text-success"></i>{{ w.exercise }}</span>
-              <span class="badge text-bg-primary rounded-pill">{{ w.reps }} reps</span>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <div class="text-muted">No workouts yet.</div>
-      {% endif %}
-    </div>
 
-    <div class="card p-3 shadow-card mt-3">
-      <h5 class="mb-3"><i class="bi bi-flag me-1 text-warning"></i> Goals</h5>
-      {% if goals %}
-        <ul class="list-group list-group-flush">
-          {% for g in goals | reverse %}
-            <li class="list-group-item">
-              <div class="d-flex justify-content-between align-items-center">
+  <!-- Right Column: Recent Activity & Goals -->
+  <div class="col-lg-4">
+    <div class="d-flex flex-column gap-4">
+      <!-- Recent Workouts Card -->
+      <div class="card p-3 shadow-card">
+        <div class="card-header-title mb-3">
+          <i class="bi bi-clock-history text-info"></i>
+          <span>Recent Workouts</span>
+        </div>
+        {% if recent %}
+          <ul class="list-group list-group-flush">
+            {% for w in recent[-5:] | reverse %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-bullseye me-1 text-danger"></i>
-                  <div>
-                    <div class="fw-semibold">{{ g.type }}</div>
-                    <div class="small text-muted">Due {{ g.target_date }}{% if g.days_left is not none %} ({{ g.days_left }} days left){% endif %}</div>
+                  <span class="tag {% if w.exercise == 'squat' %}tag-green{% elif w.exercise == 'push-up' %}tag-info{% elif w.exercise == 'sit-up' %}tag-cyan{% else %}tag-pink{% endif %} text-capitalize">
+                    {{ w.exercise }}
+                  </span>
+                  {% if w.duration_sec %}
+                    <span class="small text-secondary">{{ (w.duration_sec // 60) }}m {{ (w.duration_sec % 60) }}s</span>
+                  {% endif %}
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge rounded-pill" style="background: linear-gradient(135deg, #6366f1, #06b6d4); font-size: 0.8rem;">
+                    {{ w.reps }} reps
+                  </span>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="empty-state-box">
+            <div class="empty-state-icon">
+              <i class="bi bi-stopwatch"></i>
+            </div>
+            <div class="empty-state-title">No workouts logged yet</div>
+            <div class="empty-state-text">Start your first exercise on the left to record your reps!</div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Active Goals Card -->
+      <div class="card p-3 shadow-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="card-header-title">
+            <i class="bi bi-flag-fill text-warning"></i>
+            <span>Fitness Goals</span>
+          </div>
+          {% if goals %}
+            <button class="btn btn-sm btn-glass-primary py-1 px-2" data-bs-toggle="modal" data-bs-target="#goalModal">
+              <i class="bi bi-plus"></i> Add
+            </button>
+          {% endif %}
+        </div>
+
+        {% if goals %}
+          <ul class="list-group list-group-flush">
+            {% for g in goals | reverse %}
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-bullseye text-danger"></i>
+                    <div>
+                      <div class="fw-semibold text-white">{{ g.type }}</div>
+                      <div class="small text-secondary">
+                        Due {{ g.target_date }}{% if g.days_left is not none %} ({{ g.days_left }}d left){% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  {% if g.completed %}
+                    <span class="badge text-bg-success">Done</span>
+                  {% elif g.warn %}
+                    <span class="badge text-bg-danger">Due Soon</span>
+                  {% else %}
+                    <span class="badge text-bg-info">Active</span>
+                  {% endif %}
+                </div>
+                <div class="progress mt-2" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ g.progress }}">
+                  <div class="progress-bar {% if g.completed %}bg-success{% elif g.warn %}bg-danger{% else %}bg-info{% endif %}" style="width: {{ g.progress }}%">
+                    {{ g.progress }}%
                   </div>
                 </div>
-                {% if g.notes %}<span class="badge text-bg-secondary">{{ g.notes }}</span>{% endif %}
-              </div>
-              <div class="progress mt-2" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ g.progress }}">
-                <div class="progress-bar {% if g.completed %}bg-success{% elif g.warn %}bg-danger{% else %}bg-info{% endif %}" style="width: {{ g.progress }}%">
-                  {{ g.progress }}%
-                </div>
-              </div>
-              {% if g.warn and not g.completed %}
-                <div class="small text-danger mt-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Due date is near. Keep going!</div>
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <div class="text-muted">No goals set yet.</div>
-      {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="empty-state-box">
+            <div class="empty-state-icon">
+              <i class="bi bi-bullseye"></i>
+            </div>
+            <div class="empty-state-title">No goals set yet</div>
+            <div class="empty-state-text mb-3">Set targets to stay motivated and track your milestones.</div>
+            <button class="btn btn-sm btn-gradient" data-bs-toggle="modal" data-bs-target="#goalModal">
+              <i class="bi bi-plus-circle me-1"></i>Set a Goal
+            </button>
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Profile Modal -->
+<!-- ==========================================================================
+     Profile Modal
+     ========================================================================== -->
 <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-person-lines-fill me-2"></i>Your Profile</h5>
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <i class="bi bi-person-lines-fill text-info"></i>
+          <span>Athlete Profile</span>
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form method="post" action="{{ url_for('profile_update') }}">
           <input type="hidden" name="_csrf" value="{{ csrf }}">
-          <div class="row g-2">
-            <div class="col-12"><label class="form-label">Full Name</label><input class="form-control" name="full_name" value="{{ user.full_name or '' }}"></div>
-            <div class="col-6"><label class="form-label">Age</label><input class="form-control" name="age" type="number" min="0" value="{{ user.age or '' }}"></div>
-            <div class="col-6"><label class="form-label">Gender</label>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Full Name</label>
+              <input class="form-control" name="full_name" value="{{ user.full_name or '' }}" placeholder="Your name">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Age</label>
+              <input class="form-control" name="age" type="number" min="0" value="{{ user.age or '' }}" placeholder="e.g. 25">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Gender</label>
               <select class="form-select" name="gender">
                 <option {% if (user.gender or '')=='Male' %}selected{% endif %}>Male</option>
                 <option {% if (user.gender or '')=='Female' %}selected{% endif %}>Female</option>
                 <option {% if (user.gender or '')=='Other' %}selected{% endif %}>Other</option>
               </select>
             </div>
-            <div class="col-6"><label class="form-label">Height (cm)</label><input class="form-control" name="height_cm" type="number" min="0" value="{{ user.height_cm or '' }}"></div>
-            <div class="col-6"><label class="form-label">Weight (kg)</label><input class="form-control" name="weight_kg" type="number" min="0" value="{{ user.weight_kg or '' }}"></div>
-            <div class="col-12"><label class="form-label">Email</label><input class="form-control" value="{{ user.username or '' }}" disabled></div>
+            <div class="col-6">
+              <label class="form-label">Height (cm)</label>
+              <input class="form-control" name="height_cm" type="number" min="0" value="{{ user.height_cm or '' }}" placeholder="e.g. 178">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Weight (kg)</label>
+              <input class="form-control" name="weight_kg" type="number" min="0" value="{{ user.weight_kg or '' }}" placeholder="e.g. 72">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Account Email</label>
+              <input class="form-control" value="{{ user.username or '' }}" disabled>
+            </div>
           </div>
-          <div class="modal-footer px-0">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-gradient"><i class="bi bi-save me-1"></i>Save</button>
+          <div class="modal-footer px-0 pb-0 mt-4">
+            <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gradient">
+              <i class="bi bi-check2-circle"></i> Save Changes
+            </button>
           </div>
         </form>
       </div>
     </div>
   </div>
-  </div>
+</div>
 
-<!-- History Modal -->
+<!-- ==========================================================================
+     History Modal
+     ========================================================================== -->
 <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-clock-history me-2"></i>Workout History</h5>
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <i class="bi bi-clock-history text-success"></i>
+          <span>Workout History Summary</span>
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         {% if totals %}
-          <ul class="list-group">
+          <div class="list-group">
             {% for k, v in totals.items() %}
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-activity"></i>
-                  <span class="text-capitalize">{{ k }}</span>
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                  <span class="icon-circle {% if k == 'squat' %}icon-squat{% elif k == 'push-up' %}icon-pushup{% elif k == 'sit-up' %}icon-situp{% else %}icon-walk{% endif %}">
+                    <i class="bi bi-activity"></i>
+                  </span>
+                  <div>
+                    <div class="fw-bold text-white text-capitalize">{{ k }}</div>
+                    <div class="small text-secondary">{{ (v.duration_sec // 60) }}m {{ (v.duration_sec % 60) }}s training time</div>
+                  </div>
                 </div>
                 <div class="text-end">
-                  <div><b>{{ v.reps }}</b> reps total</div>
-                  <div class="small text-muted">{{ (v.duration_sec // 60) }} min {{ (v.duration_sec % 60) }} sec</div>
+                  <span class="badge rounded-pill fs-6" style="background: linear-gradient(135deg, #6366f1, #06b6d4);">
+                    {{ v.reps }} reps
+                  </span>
                 </div>
-              </li>
+              </div>
             {% endfor %}
-          </ul>
+          </div>
         {% else %}
-          <div class="text-muted">No workout history yet.</div>
+          <div class="empty-state-box">
+            <div class="empty-state-icon"><i class="bi bi-journal-x"></i></div>
+            <div class="empty-state-title">No workout history yet</div>
+            <div class="empty-state-text">Complete exercises to view your aggregate stats here.</div>
+          </div>
         {% endif %}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
-  </div>
+</div>
 
-<!-- Goal Modal -->
+<!-- ==========================================================================
+     Set Goal Modal
+     ========================================================================== -->
 <div class="modal fade" id="goalModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-bullseye me-2"></i>Set a Goal</h5>
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <i class="bi bi-bullseye text-primary"></i>
+          <span>Set a Fitness Goal</span>
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form method="post" action="{{ url_for('goals_create') }}">
         <input type="hidden" name="_csrf" value="{{ csrf }}">
         <div class="modal-body">
-          <div class="row g-2">
-            <div class="col-12"><label class="form-label">Goal</label>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Goal Target</label>
               <select class="form-select" name="goal_type" required>
                 <option>Muscle building</option>
                 <option>Weight loss</option>
@@ -213,77 +379,104 @@
                 <option>Rehab & mobility</option>
               </select>
             </div>
-            <div class="col-6"><label class="form-label">Target date</label><input class="form-control" name="target_date" type="date" required></div>
-            <div class="col-12"><label class="form-label">Notes (optional)</label><textarea class="form-control" name="notes" rows="2" placeholder="Add a short note"></textarea></div>
+            <div class="col-12">
+              <label class="form-label">Target Completion Date</label>
+              <input class="form-control" name="target_date" type="date" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Notes (Optional)</label>
+              <textarea class="form-control" name="notes" rows="2" placeholder="e.g. Aiming for 50 pushups daily"></textarea>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-gradient"><i class="bi bi-check2-circle me-1"></i>Save Goal</button>
+          <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-gradient">
+            <i class="bi bi-check2-circle"></i> Save Goal
+          </button>
         </div>
       </form>
     </div>
   </div>
-  </div>
+</div>
 
-<!-- View Goals Modal -->
+<!-- ==========================================================================
+     View Goals Modal
+     ========================================================================== -->
 <div class="modal fade" id="viewGoalsModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-list-check me-2"></i>Your Goals</h5>
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <i class="bi bi-list-check text-warning"></i>
+          <span>Manage Your Goals</span>
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         {% if goals %}
           <div class="list-group">
             {% for g in goals %}
-              <div class="list-group-item">
+              <div class="list-group-item p-3">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <div class="fw-semibold">{{ g.type }}</div>
-                    <div class="small text-muted">Due {{ g.target_date }}{% if g.days_left is not none %} ({{ g.days_left }} days left){% endif %}</div>
-                    {% if g.notes %}<div class="small">{{ g.notes }}</div>{% endif %}
+                    <div class="fw-bold text-white fs-6">{{ g.type }}</div>
+                    <div class="small text-secondary">
+                      Due {{ g.target_date }}{% if g.days_left is not none %} ({{ g.days_left }} days remaining){% endif %}
+                    </div>
+                    {% if g.notes %}
+                      <div class="small text-info mt-1"><i class="bi bi-chat-left-text me-1"></i>{{ g.notes }}</div>
+                    {% endif %}
                   </div>
-                  {% if g.warn and not g.completed %}
-                    <span class="badge text-bg-danger">Due soon</span>
-                  {% elif g.completed %}
-                    <span class="badge text-bg-success">Completed</span>
-                  {% else %}
-                    <span class="badge text-bg-info">In progress</span>
-                  {% endif %}
+                  <div>
+                    {% if g.completed %}
+                      <span class="badge text-bg-success">Completed</span>
+                    {% elif g.warn %}
+                      <span class="badge text-bg-danger">Due Soon</span>
+                    {% else %}
+                      <span class="badge text-bg-info">In Progress</span>
+                    {% endif %}
+                  </div>
                 </div>
-                <div class="progress mt-2" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ g.progress }}">
-                  <div class="progress-bar {% if g.completed %}bg-success{% elif g.warn %}bg-danger{% else %}bg-info{% endif %}" style="width: {{ g.progress }}%">{{ g.progress }}%</div>
+                <div class="progress mt-3" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ g.progress }}">
+                  <div class="progress-bar {% if g.completed %}bg-success{% elif g.warn %}bg-danger{% else %}bg-info{% endif %}" style="width: {{ g.progress }}%">
+                    {{ g.progress }}%
+                  </div>
                 </div>
-                <form class="row g-2 mt-2" method="post" action="{{ url_for('goals_update') }}">
+                <form class="row g-2 mt-3 align-items-center" method="post" action="{{ url_for('goals_update') }}">
                   <input type="hidden" name="_csrf" value="{{ csrf }}">
                   <input type="hidden" name="index" value="{{ g.index }}">
-                  <div class="col-md-6">
-                    <label class="form-label">Progress (%)</label>
-                    <input class="form-control" type="number" name="progress" min="0" max="100" value="{{ g.progress }}">
+                  <div class="col-md-5">
+                    <label class="form-label small mb-1">Update Progress (%)</label>
+                    <input class="form-control form-control-sm" type="number" name="progress" min="0" max="100" value="{{ g.progress }}">
                   </div>
-                  <div class="col-md-3 form-check d-flex align-items-end">
-                    <input class="form-check-input me-2" type="checkbox" name="completed" id="done{{ g.index }}" {% if g.completed %}checked{% endif %}>
-                    <label class="form-check-label" for="done{{ g.index }}">Completed</label>
+                  <div class="col-md-4 pt-md-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="completed" id="done{{ g.index }}" {% if g.completed %}checked{% endif %}>
+                      <label class="form-check-label text-white small" for="done{{ g.index }}">Mark Completed</label>
+                    </div>
                   </div>
-                  <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-gradient w-100" type="submit"><i class="bi bi-save me-1"></i>Update</button>
+                  <div class="col-md-3 pt-md-3">
+                    <button class="btn btn-sm btn-gradient w-100" type="submit">
+                      <i class="bi bi-check-lg"></i> Update
+                    </button>
                   </div>
                 </form>
               </div>
             {% endfor %}
           </div>
         {% else %}
-          <div class="text-muted">No goals to show.</div>
+          <div class="empty-state-box">
+            <div class="empty-state-icon"><i class="bi bi-bullseye"></i></div>
+            <div class="empty-state-title">No goals created yet</div>
+            <div class="empty-state-text">Add your fitness targets to start tracking your journey.</div>
+          </div>
         {% endif %}
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-glass" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
-  </div>
+</div>
 {% endblock %}
-
-

@@ -134,3 +134,28 @@ dmypy.json
 result_align.avi
 
 data/
+# Model weights (downloaded automatically on first launch)
+*.pt
+*.pth
+*.weights
+*.onnx
+
+# YOLO & Deep Learning run artifacts
+runs/
+weights/
+
+# Virtual Environments
+.venv*
+env*
+venv*
+
+# IDE & Editor files
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+*.bak

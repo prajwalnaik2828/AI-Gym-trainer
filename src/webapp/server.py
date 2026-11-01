@@ -21,6 +21,7 @@ import threading
 from app.storage import signup as store_signup, login as store_login, get_user, list_workouts, add_workout, update_user, set_goal, list_goals, update_goal
 from excerciseType import excerciseType
 from bodyPartAngle import BodyPartAngle
+from app.trainer_coach import get_trainer_coach
 
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
@@ -32,11 +33,22 @@ app.config.update(
 )
 
 
-# Single Pose instance for performance
+# MediaPipe Pose instance
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 pose = mp_pose.Pose(model_complexity=0, min_detection_confidence=0.6, min_tracking_confidence=0.6)
 POSE_LOCK = threading.Lock()
+
+# YOLO11 Pose instance
+try:
+    from yolo_pose import YOLOPoseDetector
+    yolo_detector = YOLOPoseDetector()
+    YOLO_LOCK = threading.Lock()
+    HAS_YOLO11 = True
+except Exception as _e:
+    yolo_detector = None
+    YOLO_LOCK = threading.Lock()
+    HAS_YOLO11 = False
 TUTORIALS = {
     "squat": "https://www.youtube-nocookie.com/embed/aclHkVaku9U?rel=0&modestbranding=1",
     "push-up": "https://www.youtube-nocookie.com/embed/IODxDxX7oi4?rel=0&modestbranding=1",
@@ -99,10 +111,10 @@ def set_security_headers(resp):
     resp.headers['X-Content-Type-Options'] = 'nosniff'
     resp.headers['X-Frame-Options'] = 'DENY'
     resp.headers['Referrer-Policy'] = 'no-referrer'
-    resp.headers['Permissions-Policy'] = 'camera=(self)'
+    resp.headers['Permissions-Policy'] = 'camera=*'
     # Only set CSP on HTML responses to avoid flagging for non-HTML resources
     if (resp.mimetype or '').startswith('text/html'):
-        csp = "default-src 'self' data: blob:; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://cdn.jsdelivr.net; frame-ancestors 'none'"
+        csp = "default-src 'self' data: blob:; img-src 'self' data: blob:; media-src 'self' blob:; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; connect-src 'self' https://cdn.jsdelivr.net; frame-ancestors 'none'"
         resp.headers['Content-Security-Policy'] = csp
     # Ensure charset on HTML responses
     if (resp.mimetype or '').startswith('text/html') and 'charset' not in (resp.content_type or '').lower():
@@ -282,39 +294,51 @@ def _generate_cue(landmarks, exercise: str, status: bool) -> Optional[str]:
     return None
 
 
-def _process_frame(bgr: np.ndarray, exercise: str, st: SessionState) -> Tuple[np.ndarray, int, bool, Optional[str]]:
-    # downscale to reduce CPU
+def _process_frame(bgr: np.ndarray, exercise: str, st: SessionState, engine: str = "yolo11", session_id: str = "default") -> Tuple[np.ndarray, int, bool, Optional[str]]:
+    # downscale slightly to reduce inference latency if necessary
     h, w = bgr.shape[:2]
     scale = 0.6 if max(h, w) > 720 else 1.0
     if scale != 1.0:
         bgr = cv2.resize(bgr, (int(w*scale), int(h*scale)), interpolation=cv2.INTER_AREA)
-    rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
-    rgb.flags.writeable = False
-    try:
-        with POSE_LOCK:
-            results = pose.process(rgb)
-    except Exception:
-        results = type('R', (), {'pose_landmarks': None})()
-    rgb.flags.writeable = True
-    frame = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
 
-    if results.pose_landmarks:
-        landmarks = results.pose_landmarks.landmark
-        st.counter, st.status = excerciseType(landmarks).calculate_exercise(exercise, st.counter, st.status)
-        mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-        # cue rate limit
-        import time as _time
-        cue = _generate_cue(landmarks, exercise, st.status)
-        now = _time.time()
-        if cue and (now - st.last_cue_ts > 2.5) and cue != st.last_cue:
-            st.last_cue_ts = now
-            st.last_cue = cue
-        else:
-            cue = None
+    landmarks = None
+    frame = bgr
+
+    # Prefer YOLO11 Pose if selected and available
+    if engine == "yolo11" and yolo_detector is not None:
+        try:
+            with YOLO_LOCK:
+                frame, landmarks = yolo_detector.process(bgr)
+        except Exception:
+            landmarks = None
     else:
-        cue = None
+        # Fallback to MediaPipe
+        rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
+        rgb.flags.writeable = False
+        try:
+            with POSE_LOCK:
+                results = pose.process(rgb)
+        except Exception:
+            results = type('R', (), {'pose_landmarks': None})()
+        rgb.flags.writeable = True
+        frame = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
 
-    cv2.putText(frame, f"{exercise} | reps: {st.counter}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        if results.pose_landmarks:
+            landmarks = results.pose_landmarks.landmark
+            mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+    if landmarks:
+        try:
+            st.counter, st.status = excerciseType(landmarks).calculate_exercise(exercise, st.counter, st.status)
+        except Exception:
+            pass
+
+    # Dynamic, intelligent personal trainer coaching
+    coach = get_trainer_coach(session_id)
+    cue = coach.evaluate_form_and_get_cue(landmarks, exercise, st.counter, st.status)
+
+    tag = "YOLO11" if (engine == "yolo11" and yolo_detector is not None) else "MediaPipe"
+    cv2.putText(frame, f"{exercise} | reps: {st.counter} ({tag})", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
     return frame, st.counter, st.status, cue
 
 
@@ -329,6 +353,7 @@ def api_frame():
         return jsonify({"error": "bad_csrf"}), 400
     data_url = payload.get("image")
     exercise = payload.get("exercise", "squat")
+    engine = payload.get("engine", "yolo11")
     if not data_url or not data_url.startswith("data:image/"):
         return jsonify({"error": "bad_request"}), 400
     # decode base64
@@ -340,14 +365,15 @@ def api_frame():
         if bgr is None:
             return jsonify({"error": "decode_failed"}), 400
         st = get_state()
-        frame, counter, status, cue = _process_frame(bgr, exercise, st)
+        sid = session.get("sid", "default")
+        frame, counter, status, cue = _process_frame(bgr, exercise, st, engine=engine, session_id=sid)
         try:
             encode_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
             _, encoded = cv2.imencode('.jpg', frame, encode_params)
         except Exception:
             _, encoded = cv2.imencode('.jpg', frame)
         out_data_url = "data:image/jpeg;base64," + base64.b64encode(encoded.tobytes()).decode('utf-8')
-        return jsonify({"counter": counter, "status": status, "image": out_data_url, "cue": cue})
+        return jsonify({"counter": counter, "status": status, "image": out_data_url, "cue": cue, "engine": engine})
     except Exception as e:
         return jsonify({"error": "processing_failed"}), 500
 

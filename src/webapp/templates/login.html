@@ -1,34 +1,49 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-5">
-    <div class="card p-4 shadow-card">
-      <div class="d-flex align-items-center gap-2 mb-2">
-        <span class="icon-circle"><i class="bi bi-box-arrow-in-right"></i></span>
-        <h3 class="mb-0">Welcome back</h3>
+<div class="auth-wrapper">
+  <div class="auth-ambient-glow"></div>
+  <div class="card shadow-card auth-card">
+    <div class="text-center">
+      <div class="auth-badge">
+        <i class="bi bi-fire"></i>
       </div>
-      <div class="muted mb-3">Sign in to continue your training</div>
-      {% if error %}
-      <div class="alert alert-danger">{{ error }}</div>
-      {% endif %}
-      <form method="post">
-        <input type="hidden" name="_csrf" value="{{ csrf }}">
-        <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input class="form-control" name="email" type="email" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Password</label>
-          <input class="form-control" name="password" type="password" required>
-        </div>
-        <button class="btn btn-gradient w-100" type="submit"><i class="bi bi-unlock me-1"></i>Login</button>
-      </form>
-      <div class="text-center mt-3">
-        <a class="text-white" href="{{ url_for('signup') }}">Create an account</a>
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-subtitle">Sign in to continue your AI-guided fitness training</p>
+    </div>
+
+    {% if error %}
+      <div class="alert alert-danger py-2 d-flex align-items-center gap-2 mb-3" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; border-radius: 12px;">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span>{{ error }}</span>
       </div>
+    {% endif %}
+
+    <form method="post">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      <div class="mb-3">
+        <label class="form-label d-flex align-items-center gap-2">
+          <i class="bi bi-envelope text-info"></i>
+          <span>Email Address</span>
+        </label>
+        <input class="form-control" name="email" type="email" placeholder="name@example.com" required autocomplete="email">
+      </div>
+      <div class="mb-4">
+        <label class="form-label d-flex align-items-center gap-2">
+          <i class="bi bi-lock text-info"></i>
+          <span>Password</span>
+        </label>
+        <input class="form-control" name="password" type="password" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button class="btn btn-gradient w-100 py-3 mb-3" type="submit">
+        <i class="bi bi-box-arrow-in-right"></i>
+        <span>Sign In to Workout</span>
+      </button>
+    </form>
+
+    <div class="text-center pt-2" style="border-top: 1px solid var(--border-subtle);">
+      <span class="text-secondary small">Don't have an account yet? </span>
+      <a class="text-info fw-semibold text-decoration-none small" href="{{ url_for('signup') }}">Create an account →</a>
     </div>
   </div>
-  </div>
+</div>
 {% endblock %}
-
-
