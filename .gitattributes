@@ -1,0 +1,5 @@
+# Treat Jupyter notebooks as documentation/vendor so Python is the primary language
+*.ipynb linguist-documentation=true
+*.ipynb linguist-detectable=false
+src/repnet_.ipynb linguist-vendored=true
+
