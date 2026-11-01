@@ -49,8 +49,8 @@ An intelligent, real-time computer vision workout assistant designed to guide, c
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/<YOUR_USERNAME>/AI-Gym-Trainer.git
-   cd AI-Gym-Trainer
+   git clone https://github.com/prajwalnaik2828/AI-Gym-trainer.git
+   cd AI-Gym-trainer
    ```
 
 2. **Set up a virtual environment (recommended):**
@@ -169,7 +169,7 @@ AI-Gym-Trainer/
 
 ## 🤝 Attribution & Acknowledgments
 
-This project builds upon and significantly extends the foundational research work from the open-source repository [raghunandan20/AI-Gym-trainer](https://github.com/raghunandan20/AI-Gym-trainer), originally created by:
+This project builds upon and significantly extends the foundational research work from the open-source repository [shrishashegde/AI-Gym-Trainer](https://github.com/shrishashegde/AI-Gym-Trainer), originally created by:
 - **Shrisha Shridhar Hegde** (`shrisha.hegde@sjsu.edu`)
 - **Suruchi Sharma** (`suruchi.sharma@sjsu.edu`)
 - **Ankur** (`ankur@sjsu.edu`)
